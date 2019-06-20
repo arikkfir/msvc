@@ -20,11 +20,15 @@ type methodAdapter struct {
 	responseType      reflect.Type
 }
 
-func NewAdapter(method interface{}) MethodAdapter {
+func NewAdapter(method interface{}) *methodAdapter {
+	if method == nil {
+		panic(errors.Errorf("nil method provided"))
+	}
+
 	t := reflect.TypeOf(method)
 	v := reflect.ValueOf(method)
 
-	expectedSig := "func(context.Context, *<YourRequestStruct>)(*<YourResponseStruct>,error)"
+	expectedSig := "func(context.Context, *<YourRequestStruct>)(*<YourResponseStruct>, error)"
 	foundSig := t.String()
 	if t.Kind() != reflect.Func {
 		panic(errors.Errorf("not a function (%s)", method))
@@ -35,6 +39,8 @@ func NewAdapter(method interface{}) MethodAdapter {
 	} else if t.In(1).Kind() != reflect.Ptr {
 		panic(errors.Errorf("wrong signature - must be %s, found: %s", expectedSig, foundSig))
 	} else if t.In(1).Elem().Kind() != reflect.Struct {
+		panic(errors.Errorf("wrong signature - must be %s, found: %s", expectedSig, foundSig))
+	} else if t.NumOut() != 2 {
 		panic(errors.Errorf("wrong signature - must be %s, found: %s", expectedSig, foundSig))
 	} else if t.Out(0).Kind() != reflect.Ptr {
 		panic(errors.Errorf("wrong signature - must be %s, found: %s", expectedSig, foundSig))
