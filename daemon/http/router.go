@@ -2,7 +2,7 @@ package http
 
 import (
 	"fmt"
-	"github.com/bluebudgetz/msvc"
+	"github.com/arikkfir/msvc"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/pkg/errors"

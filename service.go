@@ -3,7 +3,7 @@ package msvc
 import (
 	"context"
 	"fmt"
-	"github.com/bluebudgetz/msvc/util"
+	"github.com/arikkfir/msvc/util"
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/pkg/errors"
@@ -126,7 +126,7 @@ func (ms *MicroService) Environment() int {
 }
 
 func (ms *MicroService) Log(kv ...interface{}) {
-	ms.log.Log(kv...)
+	_ = ms.log.Log(kv...)
 }
 
 func (ms *MicroService) Name() string {

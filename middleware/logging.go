@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"github.com/bluebudgetz/msvc"
+	"github.com/arikkfir/msvc"
 )
 
 func Logging(ms *msvc.MicroService, methodName string, method msvc.Method) msvc.Method {

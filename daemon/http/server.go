@@ -2,7 +2,7 @@ package http
 
 import (
 	"fmt"
-	"github.com/bluebudgetz/msvc"
+	"github.com/arikkfir/msvc"
 	"net/http"
 )
 

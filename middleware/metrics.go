@@ -3,7 +3,7 @@ package middleware
 import (
 	"context"
 	"fmt"
-	"github.com/bluebudgetz/msvc"
+	"github.com/arikkfir/msvc"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
@@ -43,7 +43,7 @@ func MethodDuration(ms *msvc.MicroService, methodName string, method msvc.Method
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		defer func(begin time.Time) {
 			metric.
-				With(prometheus.Labels{"service": ms.Name(), "method": methodName,}).
+				With(prometheus.Labels{"service": ms.Name(), "method": methodName}).
 				Observe(time.Since(begin).Seconds())
 		}(time.Now())
 		return method(ctx, request)

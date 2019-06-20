@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/bluebudgetz/msvc"
+	"github.com/arikkfir/msvc"
 	"github.com/pkg/errors"
 	"net/http"
 )

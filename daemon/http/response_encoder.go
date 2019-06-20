@@ -3,7 +3,7 @@ package http
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/bluebudgetz/msvc"
+	"github.com/arikkfir/msvc"
 	"github.com/pkg/errors"
 	"io"
 	"net/http"

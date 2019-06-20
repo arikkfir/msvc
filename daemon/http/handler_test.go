@@ -2,7 +2,7 @@ package http
 
 import (
 	"context"
-	"github.com/bluebudgetz/msvc"
+	"github.com/arikkfir/msvc"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"net/http"
