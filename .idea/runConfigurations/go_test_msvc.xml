@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="go test msvc" type="GoTestRunConfiguration" factoryName="Go Test" nameIsGenerated="true">
+    <module name="msvc" />
+    <working_directory value="$PROJECT_DIR$" />
+    <go_parameters value="-i" />
+    <framework value="gotest" />
+    <kind value="DIRECTORY" />
+    <package value="github.com/arikkfir/msvc" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$" />
+    <method v="2" />
+  </configuration>
+</component>
