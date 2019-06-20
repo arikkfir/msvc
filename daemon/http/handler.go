@@ -6,13 +6,17 @@ import (
 	"net/http"
 )
 
-type Handler struct {
-	requestDecoder  *requestDecoder
-	responseEncoder *responseEncoder
+type Handler interface {
+	Handle(http.ResponseWriter, *http.Request)
+}
+
+type handler struct {
+	requestDecoder  RequestDecoder
+	responseEncoder ResponseEncoder
 	methodAdapter   msvc.MethodAdapter
 }
 
-func NewHandler(methodAdapter msvc.MethodAdapter) *Handler {
+func NewHandler(methodAdapter msvc.MethodAdapter) *handler {
 	requestDecoder, err := newRequestDecoder(methodAdapter.RequestType())
 	if err != nil {
 		panic(errors.Wrapf(err, "failed creating request decoder for '%s'", methodAdapter.RequestType()))
@@ -21,22 +25,30 @@ func NewHandler(methodAdapter msvc.MethodAdapter) *Handler {
 	if err != nil {
 		panic(errors.Wrapf(err, "failed creating response encoder for '%s'", methodAdapter.ResponseType()))
 	}
-	return &Handler{requestDecoder, responseEncoder, methodAdapter}
+	return &handler{requestDecoder, responseEncoder, methodAdapter}
 }
 
-func (h *Handler) handle(w http.ResponseWriter, r *http.Request) {
-	serviceRequest, err := h.requestDecoder.decode(r)
+func (h *handler) Handle(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if rvr := recover(); rvr != nil {
+			if ms := msvc.GetFromContext(r.Context()); ms != nil {
+				ms.Log("panic", rvr, "msg", "recovered from panic")
+			}
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}()
+
+	serviceRequest, err := h.requestDecoder.Decode(r)
 	if err != nil {
-		h.responseEncoder.serviceResponseAndErrorToHttpResponse(nil, err, r, w)
+		h.responseEncoder.MarshallServiceResponseAndError(nil, err, r, w)
 		return
 	}
 
-	ctx := r.Context()
-	serviceResponse, err := h.methodAdapter.Call(ctx, serviceRequest)
+	serviceResponse, err := h.methodAdapter.Call(r.Context(), serviceRequest)
 	if err != nil {
-		h.responseEncoder.serviceResponseAndErrorToHttpResponse(serviceResponse, err, r, w)
+		h.responseEncoder.MarshallServiceResponseAndError(serviceResponse, err, r, w)
 		return
 	}
 
-	h.responseEncoder.serviceResponseToHttpResponse(serviceResponse, r, w)
+	h.responseEncoder.MarshallServiceResponse(serviceResponse, r, w)
 }

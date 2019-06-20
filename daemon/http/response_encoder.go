@@ -10,6 +10,11 @@ import (
 	"reflect"
 )
 
+type ResponseEncoder interface {
+	MarshallServiceResponse(interface{}, *http.Request, http.ResponseWriter)
+	MarshallServiceResponseAndError(interface{}, error, *http.Request, http.ResponseWriter)
+}
+
 type responseEncoder struct {
 	sourceType reflect.Type
 }
@@ -35,7 +40,7 @@ func (h *responseEncoder) marshallServiceResponse(ms *msvc.MicroService, service
 	return nil
 }
 
-func (h *responseEncoder) serviceResponseToHttpResponse(serviceResponse interface{}, r *http.Request, w http.ResponseWriter) {
+func (h *responseEncoder) MarshallServiceResponse(serviceResponse interface{}, r *http.Request, w http.ResponseWriter) {
 	if serviceResponse == nil {
 		w.WriteHeader(http.StatusOK)
 		return
@@ -55,7 +60,7 @@ func (h *responseEncoder) serviceResponseToHttpResponse(serviceResponse interfac
 			if ms != nil {
 				ms.Log("res", serviceResponse, "err", err)
 			}
-			w.WriteHeader(int(httpErr.Code()))
+			w.WriteHeader(httpErr.Code())
 		} else {
 			if ms != nil {
 				ms.Log("res", serviceResponse, "err", err)
@@ -73,7 +78,7 @@ func (h *responseEncoder) serviceResponseToHttpResponse(serviceResponse interfac
 	}
 }
 
-func (h *responseEncoder) serviceResponseAndErrorToHttpResponse(serviceResponse interface{}, serviceError error, r *http.Request, w http.ResponseWriter) {
+func (h *responseEncoder) MarshallServiceResponseAndError(serviceResponse interface{}, serviceError error, r *http.Request, w http.ResponseWriter) {
 	ms := msvc.GetFromContext(r.Context())
 	var httpStatusCode int
 

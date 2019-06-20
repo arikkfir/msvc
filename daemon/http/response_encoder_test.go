@@ -14,7 +14,7 @@ func TestResponseEncoder(t *testing.T) {
 		require.NoError(t, err)
 
 		response := httptest.NewRecorder()
-		encoder.serviceResponseToHttpResponse(
+		encoder.MarshallServiceResponse(
 			"Hello",
 			httptest.NewRequest(http.MethodGet, url, nil),
 			response)
@@ -26,7 +26,7 @@ func TestResponseEncoder(t *testing.T) {
 		require.NoError(t, err)
 
 		response := httptest.NewRecorder()
-		encoder.serviceResponseToHttpResponse(
+		encoder.MarshallServiceResponse(
 			nil,
 			httptest.NewRequest(http.MethodGet, url, nil),
 			response)
@@ -41,7 +41,7 @@ func TestResponseEncoder(t *testing.T) {
 		response := httptest.NewRecorder()
 		request := httptest.NewRequest(http.MethodGet, url, nil)
 		request.Header.Add("accept", "application/json")
-		encoder.serviceResponseToHttpResponse(Resp{String:"Hello"}, request, response)
+		encoder.MarshallServiceResponse(Resp{String:"Hello"}, request, response)
 		require.Equal(t, http.StatusOK, response.Code)
 		require.Equal(t, response.Body.String(), "{\n  \"p\": \"Hello\"\n}\n")
 	})

@@ -108,16 +108,16 @@ func mountRoutes(router chi.Router, entryKey string, entryValue interface{}) {
 		upperCaseEntryKey == http.MethodOptions ||
 		upperCaseEntryKey == http.MethodTrace {
 
-		if handler, ok := entryValue.(*Handler); ok {
-			router.MethodFunc(strings.ToUpper(entryKey), "/", handler.handle)
+		if handler, ok := entryValue.(Handler); ok {
+			router.MethodFunc(strings.ToUpper(entryKey), "/", handler.Handle)
 		} else {
 			panic(errors.Errorf("bad routes map in '%s: %+v'", entryKey, entryValue))
 		}
-	} else if handler, ok := entryValue.(*Handler); ok {
+	} else if handler, ok := entryValue.(Handler); ok {
 		if entryKey[0] != '/' {
 			entryKey = "/" + entryKey
 		}
-		router.HandleFunc(entryKey, handler.handle)
+		router.HandleFunc(entryKey, handler.Handle)
 	} else {
 		panic(errors.Errorf("bad routes map in '%s: %+v'", entryKey, entryValue))
 	}

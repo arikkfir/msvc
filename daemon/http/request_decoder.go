@@ -10,6 +10,10 @@ import (
 	"strings"
 )
 
+type RequestDecoder interface {
+	Decode(r *http.Request) (interface{}, error)
+}
+
 type requestDecoder struct {
 	targetType reflect.Type
 	parsers    []func(*http.Request, reflect.Value) error
@@ -57,7 +61,7 @@ func newRequestDecoder(targetType reflect.Type) (*requestDecoder, error) {
 	return &requestDecoder{targetType, parsers}, nil
 }
 
-func (d *requestDecoder) decode(r *http.Request) (interface{}, error) {
+func (d *requestDecoder) Decode(r *http.Request) (interface{}, error) {
 	err := r.ParseForm()
 	if err != nil {
 		panic(errors.Wrapf(err, "failed parsing HTTP request form data"))

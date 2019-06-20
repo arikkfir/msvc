@@ -43,7 +43,7 @@ func TestRequestDecoder(t *testing.T) {
 
 				request := httptest.NewRequest(http.MethodGet, url, strings.NewReader(`"hello"`))
 				request.Header.Add("content-type", "application/json")
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{Body: "hello"}, result)
 			})
@@ -60,19 +60,19 @@ func TestRequestDecoder(t *testing.T) {
 
 				request = httptest.NewRequest(http.MethodGet, url, strings.NewReader(valueJson))
 				request.Header.Add("content-type", "application/json")
-				result, err = decoder.decode(request)
+				result, err = decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{Body: &value}, result)
 
 				request = httptest.NewRequest(http.MethodGet, url, nil)
 				request.Header.Add("content-type", "application/json")
-				result, err = decoder.decode(request)
+				result, err = decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{Body: nil}, result)
 
 				request = httptest.NewRequest(http.MethodGet, url, strings.NewReader("null"))
 				request.Header.Add("content-type", "application/json")
-				result, err = decoder.decode(request)
+				result, err = decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{Body: nil}, result)
 			})
@@ -92,7 +92,7 @@ func TestRequestDecoder(t *testing.T) {
 
 				request := httptest.NewRequest(http.MethodGet, url, strings.NewReader(json))
 				request.Header.Add("content-type", "application/json")
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{Body: Body{String: "s", Int: 9, StringPtr: &sp, NilStringPtr: nil}}, result)
 			})
@@ -115,19 +115,19 @@ func TestRequestDecoder(t *testing.T) {
 
 				request = httptest.NewRequest(http.MethodGet, url, strings.NewReader(json))
 				request.Header.Add("content-type", "application/json")
-				result, err = decoder.decode(request)
+				result, err = decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{Body: &Body{String: "s", Int: 9, StringPtr: &sp, NilStringPtr: nil}}, result)
 
 				request = httptest.NewRequest(http.MethodGet, url, nil)
 				request.Header.Add("content-type", "application/json")
-				result, err = decoder.decode(request)
+				result, err = decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{Body: nil}, result)
 
 				request = httptest.NewRequest(http.MethodGet, url, strings.NewReader("null"))
 				request.Header.Add("content-type", "application/json")
-				result, err = decoder.decode(request)
+				result, err = decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{Body: nil}, result)
 			})
@@ -139,7 +139,7 @@ func TestRequestDecoder(t *testing.T) {
 
 				request := httptest.NewRequest(http.MethodGet, url, strings.NewReader(`"unterminated`))
 				request.Header.Add("content-type", "application/json")
-				_, err = decoder.decode(request)
+				_, err = decoder.Decode(request)
 				require.EqualError(t, err, "failed parsing request: failed reading JSON into 'string': unexpected EOF")
 			})
 		})
@@ -151,7 +151,7 @@ func TestRequestDecoder(t *testing.T) {
 
 			request := httptest.NewRequest(http.MethodGet, url, nil)
 			request.Header.Add("content-type", "application/unknown")
-			_, err = decoder.decode(request)
+			_, err = decoder.Decode(request)
 			require.EqualError(t, err, "failed parsing request: 415: 'application/unknown' is not supported")
 		})
 	})
@@ -164,7 +164,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: ""}, result)
 			})
@@ -175,7 +175,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, "http://localhost:3001?s=val1", nil)
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: "val1"}, result)
 			})
@@ -186,7 +186,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, "http://localhost:3001?s=val1&s=val2", nil)
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: "val1"}, result)
 			})
@@ -199,7 +199,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: nil}, result)
 			})
@@ -210,7 +210,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, "http://localhost:3001?s="+value, nil)
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: &value}, result)
 			})
@@ -221,7 +221,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, "http://localhost:3001?s=val1&s=val2", nil)
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: &value}, result)
 			})
@@ -234,7 +234,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: nil}, result)
 			})
@@ -244,7 +244,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, "http://localhost:3001?s=val1", nil)
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: []string{"val1"}}, result)
 			})
@@ -254,7 +254,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, "http://localhost:3001?s=val1&s=val2", nil)
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: []string{"val1", "val2"}}, result)
 			})
@@ -272,7 +272,7 @@ func TestRequestDecoder(t *testing.T) {
 				request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, &chi.Context{
 					URLParams: chi.RouteParams{Keys: []string{}, Values: []string{}},
 				}))
-				_, err = decoder.decode(request)
+				_, err = decoder.Decode(request)
 				require.EqualError(t, err, "failed parsing request: empty value for path parameter 'p', required for field 'String'")
 			})
 			t.Run("value_found", func(t *testing.T) {
@@ -288,7 +288,7 @@ func TestRequestDecoder(t *testing.T) {
 						Values: []string{"val1"},
 					},
 				}))
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: "val1"}, result)
 			})
@@ -304,7 +304,7 @@ func TestRequestDecoder(t *testing.T) {
 				request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, &chi.Context{
 					URLParams: chi.RouteParams{Keys: []string{}, Values: []string{}},
 				}))
-				_, err = decoder.decode(request)
+				_, err = decoder.Decode(request)
 				require.EqualError(t, err, "failed parsing request: empty value for path parameter 'p', required for field 'String'")
 			})
 			t.Run("value_found", func(t *testing.T) {
@@ -320,7 +320,7 @@ func TestRequestDecoder(t *testing.T) {
 						Values: []string{value},
 					},
 				}))
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: &value}, result)
 			})
@@ -336,7 +336,7 @@ func TestRequestDecoder(t *testing.T) {
 				request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, &chi.Context{
 					URLParams: chi.RouteParams{Keys: []string{}, Values: []string{}},
 				}))
-				_, err = decoder.decode(request)
+				_, err = decoder.Decode(request)
 				require.EqualError(t, err, "failed parsing request: empty value for path parameter 'p', required for field 'String'")
 			})
 			t.Run("value_found", func(t *testing.T) {
@@ -351,7 +351,7 @@ func TestRequestDecoder(t *testing.T) {
 						Values: []string{"val1"},
 					},
 				}))
-				require.Panics(t, func() { _, _ = decoder.decode(request) })
+				require.Panics(t, func() { _, _ = decoder.Decode(request) })
 			})
 		})
 	})
@@ -364,7 +364,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: ""}, result)
 			})
@@ -376,7 +376,7 @@ func TestRequestDecoder(t *testing.T) {
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
 				request.Header.Add("s", "val1")
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: "val1"}, result)
 			})
@@ -389,7 +389,7 @@ func TestRequestDecoder(t *testing.T) {
 				request := httptest.NewRequest(http.MethodGet, url, nil)
 				request.Header.Add("s", "val1")
 				request.Header.Add("s", "val2")
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: "val1"}, result)
 			})
@@ -402,7 +402,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: nil}, result)
 			})
@@ -414,7 +414,7 @@ func TestRequestDecoder(t *testing.T) {
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
 				request.Header.Add("s", "val1")
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: &value}, result)
 			})
@@ -427,7 +427,7 @@ func TestRequestDecoder(t *testing.T) {
 				request := httptest.NewRequest(http.MethodGet, url, nil)
 				request.Header.Add("s", "val1")
 				request.Header.Add("s", "val2")
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: &value}, result)
 			})
@@ -440,7 +440,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: nil}, result)
 			})
@@ -451,7 +451,7 @@ func TestRequestDecoder(t *testing.T) {
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
 				request.Header.Add("s", "val1")
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: []string{"val1"}}, result)
 			})
@@ -463,7 +463,7 @@ func TestRequestDecoder(t *testing.T) {
 				request := httptest.NewRequest(http.MethodGet, url, nil)
 				request.Header.Add("s", "val1")
 				request.Header.Add("s", "val2")
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: []string{"val1", "val2"}}, result)
 			})
@@ -478,7 +478,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: ""}, result)
 			})
@@ -490,7 +490,7 @@ func TestRequestDecoder(t *testing.T) {
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
 				request.AddCookie(&http.Cookie{Name: "s", Value: "val1"})
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: "val1"}, result)
 			})
@@ -503,7 +503,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: nil}, result)
 			})
@@ -515,7 +515,7 @@ func TestRequestDecoder(t *testing.T) {
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
 				request.AddCookie(&http.Cookie{Name: "s", Value: "val1"})
-				result, err := decoder.decode(request)
+				result, err := decoder.Decode(request)
 				require.NoError(t, err)
 				require.Equal(t, ServiceRequest{String: &value}, result)
 			})
@@ -528,7 +528,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
-				require.Panics(t, func() { _, _ = decoder.decode(request) })
+				require.Panics(t, func() { _, _ = decoder.Decode(request) })
 			})
 			t.Run("single_value_found", func(t *testing.T) {
 				type ServiceRequest struct{ String []string `http:"cookie,s"` }
@@ -536,7 +536,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
-				require.Panics(t, func() { _, _ = decoder.decode(request) })
+				require.Panics(t, func() { _, _ = decoder.Decode(request) })
 			})
 			t.Run("multiple_values_found", func(t *testing.T) {
 				type ServiceRequest struct{ String []string `http:"cookie,s"` }
@@ -544,7 +544,7 @@ func TestRequestDecoder(t *testing.T) {
 				require.NoError(t, err)
 
 				request := httptest.NewRequest(http.MethodGet, url, nil)
-				require.Panics(t, func() { _, _ = decoder.decode(request) })
+				require.Panics(t, func() { _, _ = decoder.Decode(request) })
 			})
 		})
 	})
