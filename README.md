@@ -8,13 +8,12 @@ Framework for building micro-services in Go.
 package main
 
 import (
-
-"context"
-"fmt"
-"github.com/arikkfir/msvc"
-"github.com/arikkfir/msvc/daemon/http"
-"github.com/arikkfir/msvc/middleware"
-"os"
+    "context"
+    "fmt"
+    "github.com/arikkfir/msvc"
+    "github.com/arikkfir/msvc/daemon/http"
+    "github.com/arikkfir/msvc/middleware"
+    "os"
 )
 
 type Config struct {
@@ -29,6 +28,7 @@ type User struct {Name string `json:"name"`}
 type GetUsersResponse struct {
     Users []User
 }
+
 func (s *UsersService) GetUsers(ctx context.Context, r *GetUsersRequest) (*GetUsersResponse, error) {
     return &GetUsersResponse{
         Users:[]User{
