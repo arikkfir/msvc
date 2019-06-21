@@ -67,17 +67,19 @@ func createRouter(ms *msvc.MicroService, corsHost string, corsPort uint16, handl
 		middleware.NoCache,
 		middleware.AllowContentType("application/json", ""),
 		middleware.ContentCharset("", "UTF-8"),
+	)
 
-		// CORS
-		cors.New(cors.Options{
+	//  Add CORS if specified in configuration
+	if corsHost != "" && corsPort != 0 {
+		router.Use(cors.New(cors.Options{
 			AllowedOrigins:   []string{fmt.Sprintf("http://%s:%d", corsHost, corsPort)},
 			AllowedMethods:   []string{"OPTIONS", "HEAD", "GET", "POST", "PATCH", "PUT", "DELETE"},
 			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 			ExposedHeaders:   []string{"Link"},
 			AllowCredentials: true,
 			MaxAge:           300,
-		}).Handler,
-	)
+		}).Handler)
+	}
 
 	// Register handlers
 	for k, v := range handlers {
