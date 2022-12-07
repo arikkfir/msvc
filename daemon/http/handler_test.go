@@ -2,7 +2,7 @@ package http
 
 import (
 	"context"
-	"github.com/arikkfir/msvc"
+	"github.com/arikkfir/msvc/adapter"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"net/http"
@@ -17,8 +17,7 @@ func TestNewHandler(t *testing.T) {
 		f := func(ctx context.Context, req *Req) (*Res, error) {
 			panic("not implemented")
 		}
-		adapter := msvc.NewAdapter(f)
-		require.Panics(t, func() { _ = NewHandler(adapter) })
+		require.Panics(t, func() { _ = NewHandler(adapter.NewAdapter(f)) })
 	})
 }
 
@@ -35,8 +34,8 @@ func TestHandlerHandle(t *testing.T) {
 		f := func(ctx context.Context, req *Req) (*Res, error) {
 			panic("this will never happen (decoder will fail first)")
 		}
-		adapter := msvc.NewAdapter(f)
-		handler := NewHandler(adapter)
+		a := adapter.NewAdapter(f)
+		handler := NewHandler(a)
 		handler.requestDecoder = &errorReturningDecoder{}
 
 		request := httptest.NewRequest("GET", "http://localhost:3001", nil)
@@ -50,8 +49,8 @@ func TestHandlerHandle(t *testing.T) {
 		f := func(ctx context.Context, req *Req) (*Res, error) {
 			return &Res{P: "v"}, errors.Errorf("bad")
 		}
-		adapter := msvc.NewAdapter(f)
-		handler := NewHandler(adapter)
+		a := adapter.NewAdapter(f)
+		handler := NewHandler(a)
 		request := httptest.NewRequest("GET", "http://localhost:3001", nil)
 		request.Header.Set("accept", "application/json")
 		response := httptest.NewRecorder()
@@ -66,8 +65,8 @@ func TestHandlerHandle(t *testing.T) {
 		f := func(ctx context.Context, req *Req) (*Res, error) {
 			panic("bad")
 		}
-		adapter := msvc.NewAdapter(f)
-		handler := NewHandler(adapter)
+		a := adapter.NewAdapter(f)
+		handler := NewHandler(a)
 		request := httptest.NewRequest("GET", "http://localhost:3001", nil)
 		response := httptest.NewRecorder()
 		handler.Handle(response, request)
@@ -80,8 +79,8 @@ func TestHandlerHandle(t *testing.T) {
 		f := func(ctx context.Context, req *Req) (*Res, error) {
 			return &Res{P: "v"}, nil
 		}
-		adapter := msvc.NewAdapter(f)
-		handler := NewHandler(adapter)
+		a := adapter.NewAdapter(f)
+		handler := NewHandler(a)
 		request := httptest.NewRequest("GET", "http://localhost:3001", nil)
 		request.Header.Set("accept", "application/json")
 		response := httptest.NewRecorder()

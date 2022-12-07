@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"strings"
 )
 
 type ResponseEncoder interface {
@@ -16,11 +17,50 @@ type ResponseEncoder interface {
 }
 
 type responseEncoder struct {
-	sourceType reflect.Type
+	sourceType  reflect.Type
+	marshallers []func(*http.Request, http.ResponseWriter, reflect.Value) error
 }
 
 func newResponseEncoder(sourceType reflect.Type) (*responseEncoder, error) {
-	return &responseEncoder{sourceType}, nil
+	if sourceType.Kind() != reflect.Struct {
+		return nil, errors.Errorf("expected struct for response encoder source type; received '%s'", sourceType.Kind())
+	}
+
+	marshallers := make([]func(*http.Request, http.ResponseWriter, reflect.Value) error, 0, 10)
+	for i := 0; i < sourceType.NumField(); i++ {
+		fieldType := sourceType.Field(i)
+
+		tag, ok := fieldType.Tag.Lookup("http")
+		if !ok {
+			return nil, errors.Errorf("missing 'http' tag for field '%s'", fieldType.Name)
+		}
+
+		tokens := strings.Split(tag, ",")
+		if len(tokens) == 0 || len(tokens) == 1 && strings.TrimSpace(tokens[0]) == "" {
+			return nil, errors.Errorf("illegal 'http' tag for field '%s': no tokens", fieldType.Name)
+		} else if len(tokens) == 1 && tokens[0] == "body" {
+			marshallers = append(marshallers, newBodyDecoder(fieldType))
+		} else if len(tokens) > 2 {
+			return nil, errors.Errorf("illegal 'http' tag for field '%s': %s", fieldType.Name, tag)
+		} else {
+			if len(tokens) == 1 {
+				tokens = []string{tokens[0], strings.ToLower(fieldType.Name)}
+			}
+			switch tokens[0] {
+			case "query":
+				marshallers = append(marshallers, newQueryParameterDecoder(fieldType, tokens[1]))
+			case "path":
+				marshallers = append(marshallers, newPathParameterDecoder(fieldType, tokens[1]))
+			case "header":
+				marshallers = append(marshallers, newHeaderDecoder(fieldType, tokens[1]))
+			case "cookie":
+				marshallers = append(marshallers, newCookieDecoder(fieldType, tokens[1]))
+			default:
+				return nil, errors.Errorf("illegal 'http' tag for field '%s': %s", fieldType.Name, tag)
+			}
+		}
+	}
+	return &responseEncoder{sourceType, marshallers}, nil
 }
 
 func (h *responseEncoder) marshallServiceResponse(ms *msvc.MicroService, serviceResponse interface{}, mediaType string, w io.Writer) error {

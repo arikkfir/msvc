@@ -1,4 +1,4 @@
-package msvc
+package adapter
 
 import (
 	"context"

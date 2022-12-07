@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/arikkfir/msvc"
+	"github.com/arikkfir/msvc/adapter"
 	"github.com/pkg/errors"
 	"net/http"
 )
@@ -13,10 +14,10 @@ type Handler interface {
 type handler struct {
 	requestDecoder  RequestDecoder
 	responseEncoder ResponseEncoder
-	methodAdapter   msvc.MethodAdapter
+	methodAdapter   adapter.MethodAdapter
 }
 
-func NewHandler(methodAdapter msvc.MethodAdapter) *handler {
+func NewHandler(methodAdapter adapter.MethodAdapter) *handler {
 	requestDecoder, err := newRequestDecoder(methodAdapter.RequestType())
 	if err != nil {
 		panic(errors.Wrapf(err, "failed creating request decoder for '%s'", methodAdapter.RequestType()))

@@ -3,6 +3,7 @@ package msvc
 import (
 	"context"
 	"fmt"
+	"github.com/arikkfir/msvc/adapter"
 	"github.com/arikkfir/msvc/util"
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
@@ -45,7 +46,7 @@ type MicroService struct {
 	config       interface{}
 	environment  int
 	log          kitlog.Logger
-	methods      map[string]MethodAdapter
+	methods      map[string]adapter.MethodAdapter
 	daemons      []Daemon
 	middlewares  []Middleware
 	methodChains map[string]Method
@@ -112,7 +113,7 @@ func New(name string, config interface{}) (*MicroService, error) {
 		name:         name,
 		daemons:      make([]Daemon, 0),
 		middlewares:  make([]Middleware, 0),
-		methods:      make(map[string]MethodAdapter, 0),
+		methods:      make(map[string]adapter.MethodAdapter, 0),
 		methodChains: make(map[string]Method, 0),
 	}, nil
 }
@@ -133,18 +134,18 @@ func (ms *MicroService) Name() string {
 	return ms.name
 }
 
-func (ms *MicroService) AddMethod(name string, method interface{}) MethodAdapter {
-	adapter := NewAdapter(method)
-	ms.methods[name] = adapter
+func (ms *MicroService) AddMethod(name string, method interface{}) adapter.MethodAdapter {
+	a := adapter.NewAdapter(method)
+	ms.methods[name] = a
 	ms.compileMethodChains()
-	return adapter
+	return a
 }
 
 func (ms *MicroService) GetMethod(name string) Method {
 	return ms.methodChains[name]
 }
 
-func (ms *MicroService) GetMethodAdapter(name string) MethodAdapter {
+func (ms *MicroService) GetMethodAdapter(name string) adapter.MethodAdapter {
 	return ms.methods[name]
 }
 
